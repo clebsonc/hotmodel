@@ -1,0 +1,50 @@
+default_language_version:
+  python: python3.11
+fail_fast: false
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.2.0
+    hooks:
+    -   id: trailing-whitespace
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: check-added-large-files
+        args: [--maxkb=1000]
+    -   id: check-ast
+    -   id: check-case-conflict
+    -   id: check-docstring-first
+    -   id: check-executables-have-shebangs
+    -   id: check-json
+    -   id: check-merge-conflict
+    -   id: debug-statements
+    -   id: requirements-txt-fixer
+-   repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+    -   id: isort
+        name: isort
+        args: ["--profile", "black"]
+-   repo: https://github.com/psf/black
+    rev: 23.11.0
+    hooks:
+    -   id: black
+-   repo: https://github.com/PyCQA/flake8
+    rev: 4.0.1
+    hooks:
+    - id: flake8
+-   repo: https://github.com/myint/docformatter
+    rev: v1.4
+    hooks:
+    -  id: docformatter
+       args: ["--in-place", "--wrap-summaries", "80", "--wrap-descriptions", "80"]
+
+# -   repo: https://github.com/PyCQA/bandit
+#     rev: 1.7.0
+#     hooks:
+#     -   id: bandit
+#         args: ["-s", "B311", "-r", "hotmodel"]
+
+# -   repo: https://github.com/PyCQA/pydocstyle
+#     rev: 6.1.1
+#     hooks:
+#     - id: pydocstyle
