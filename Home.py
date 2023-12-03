@@ -4,6 +4,7 @@ from matplotlib import pyplot as plt
 
 import hotmodel.stats as stats
 from hotmodel.data_loader import DatasetLoader
+import os
 
 sns.set_theme()
 
@@ -36,8 +37,16 @@ st.write(
     """
 )
 
+# dataloader = DatasetLoader(
+#     path="input/data.csv",
+# )
+path = os.environ.get("data_path")
+if path is None:
+    st.exception(EnvironmentError("Environment Variable `data_path` is not set."))
+    st.stop()
+
 dataloader = DatasetLoader(
-    path="input/data.csv",
+    path=path
 )
 
 dataloader.load_data()
