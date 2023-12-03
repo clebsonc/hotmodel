@@ -214,17 +214,15 @@ st.write(
 
 )
 
+
 chosen = st.selectbox(
     label="select option: ",
-    options=numerical_features,
+    options=dataloader.numerical_feature_names,
     placeholder="Chose the numerical feature to analyze",
 )
 with st.container(border=True):
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(5, 5))
     sns.boxplot(ax=ax, data=dataloader.data[chosen], orient="v", notch=False)
     st.pyplot(fig)
-
     st.write(chosen * 3)
-
-
 st.write("ii")

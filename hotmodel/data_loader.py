@@ -56,3 +56,10 @@ class DatasetLoader:
                 pd.StringDtype()
             )
             self._data[boolean_columns] = self._data[boolean_columns].astype(bool)
+
+    @property
+    def numerical_feature_names(self) -> list[str]:
+        if self._data is not None:
+            t = self._data.dtypes.reset_index().rename({0: 'type', 'index': 'feature_name'}, axis=1)
+            features = t[t['type'] == 'float']
+            return list(features['feature_name'])
