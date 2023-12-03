@@ -3,3 +3,6 @@
 .nox/
 
 input/
+
+
+*/__pycache__/
