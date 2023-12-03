@@ -20,7 +20,9 @@ def get_stats_by_variant(data: pd.DataFrame, col: list[str]) -> pd.DataFrame:
         raise InvalidColumnName("Give a list of `valid` column names")
 
 
-def get_categorical_substats_by_variant_and_column(data: pd.DataFrame, col: list[str]):
+def get_categorical_substats_by_variant_and_column(
+    data: pd.DataFrame, col: list[str]
+) -> dict[str, pd.DataFrame]:
     result = {}
     for c in col:
         a = get_stats_by_variant(data, col=[c])
@@ -30,7 +32,7 @@ def get_categorical_substats_by_variant_and_column(data: pd.DataFrame, col: list
     return result
 
 
-def get_percentage_missing_values(data: pd.DataFrame):
+def get_percentage_missing_values(data: pd.DataFrame) -> pd.DataFrame:
     temp = (
         data.isna()
         .sum()
@@ -38,4 +40,13 @@ def get_percentage_missing_values(data: pd.DataFrame):
         .rename(columns={"index": "feature_name", 0: "missing_values"})
     )
     temp["percentage"] = temp["missing_values"] / data.shape[0] * 100
+    return temp
+
+
+def undersample_col_with_na_with_categorical_group(
+    data: pd.DataFrame, col: str, group: str
+) -> pd.DataFrame:
+    temp_a = data[data[col] == group].dropna(axis=0, how="any")
+    temp_b = data[data[col] != group]
+    temp = data.loc[list(temp_a.index) + list(temp_b.index), :]
     return temp

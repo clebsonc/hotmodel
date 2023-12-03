@@ -1,7 +1,11 @@
+import seaborn as sns
 import streamlit as st
+from matplotlib import pyplot as plt
 
 import hotmodel.stats as stats
 from hotmodel.data_loader import DatasetLoader
+
+sns.set_theme()
 
 st.title("Hotmodel Data")
 
@@ -33,7 +37,7 @@ st.write(
 )
 
 dataloader = DatasetLoader(
-    path="/home/clebsonc/Dev/hotmodel/input/data.csv",
+    path="input/data.csv",
 )
 
 dataloader.load_data()
@@ -116,8 +120,8 @@ st.write(
 
     We can also observe that the categorical features `c1`, `c2`, `c4`, and `c6` have more than 9%
     of missing values. Let`s check all of the remaining categorical features groups and count the
-    instances for each group in order to better assess if there is a raw possibility of droping this
-    missing values:
+    instances for each group in order to better assess if there is a raw possibility of dropping
+    these missing values:
     """
 )
 
@@ -148,13 +152,70 @@ c1.write(cat_stats["c4"]["secondary"])
 c2.write("Aggregation for column C6")
 c2.write(cat_stats["c6"]["primary"])
 c2.write(cat_stats["c6"]["secondary"])
+st.write("---")
+
+st.write(
+    """
+    As it is possible to observe all categorical features for variant B have less than 14,720
+    samples while the features for variant A have more than or near 30,000 samples. This shows us
+    that the data set is quite unbalanced. There are lots of ways of solving this problem, bye
+    either undersampling the data with most categories or oversampling the data with less 
+    caretories.
+
+    Since the purpose here is to show the code, let`s go with the dummiest possible way of
+    resampling the dataset by just dropping all lines containing missing values for the categorical
+    features for the variant with most samples, which is variant A.
+    """
+)
 
 
 dataloader.data = dataloader.data.drop(["c5", "n9"], axis=1)
 
-st.write(
-    dataloader.data.query("variant == 'A'").shape,
-    dataloader.data.query("variant == 'A'").dropna(axis=0).shape,
+"""This is the dataset distribution for each column considering both variants before the undersample
+of variant A."""
+st.write(dataloader.data.groupby("variant").count())
+
+temp = stats.undersample_col_with_na_with_categorical_group(
+    data=dataloader.data, col="variant", group="A"
 )
 
-st.write(dataloader.data.query("variant == 'B'").shape)
+"""This is the dataset distribution for each column considering both variants after the undersample
+of variant A."""
+dataloader.data = temp
+
+st.write(dataloader.data.groupby("variant").count())
+
+st.write(
+    """
+    After the undersample, the only collum that have missing values is column `c2`.
+    Let\\`s just ignore it and handle these missing values in the pipeline when building any model
+    with this data.
+    """
+)
+
+
+st.header("Checking Numerical Features")
+st.write(
+    """
+    One of the many possible ways of verifying the distribution of numerical features is with a
+    box and whiskers plot. The benefit of using this plot is the ease of identifying outliers
+    and observe the percentiles of the distribution. Let\\`s visualize it for each individual
+    feature:
+    """
+
+)
+
+chosen = st.selectbox(
+    label="select option: ",
+    options=numerical_features,
+    placeholder="Chose the numerical feature to analyze",
+)
+with st.container(border=True):
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(5, 5))
+    sns.boxplot(ax=ax, data=dataloader.data[chosen], orient="v", notch=False)
+    st.pyplot(fig)
+
+    st.write(chosen * 3)
+
+
+st.write("ii")
