@@ -6,7 +6,7 @@ import pandas as pd
 class DatasetLoader:
     def __init__(
         self,
-        path: str | Path,
+        path: str,
     ) -> None:
         self.path = path
         self._data = None
@@ -17,12 +17,16 @@ class DatasetLoader:
         return self._path
 
     @path.setter
-    def path(self, value: Path):
-        value = Path(value)
-        if value.exists():
+    def path(self, value: str):
+        if value.startswith("https://"):
             self._path = value
         else:
-            raise FileExistsError(f"The given path does not exists: {value}")
+            # local path
+            value = Path(value)
+            if value.exists():
+                self._path = value
+            else:
+                raise FileExistsError(f"The given path does not exists: {value}")
 
     @property
     def data(self) -> pd.DataFrame:
