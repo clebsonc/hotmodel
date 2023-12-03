@@ -1,10 +1,13 @@
+"""App main page."""
+
+import os
+
 import seaborn as sns
 import streamlit as st
 from matplotlib import pyplot as plt
 
 import hotmodel.stats as stats
 from hotmodel.data_loader import DatasetLoader
-import os
 
 sns.set_theme()
 
@@ -45,9 +48,7 @@ if path is None:
     st.exception(EnvironmentError("Environment Variable `data_path` is not set."))
     st.stop()
 
-dataloader = DatasetLoader(
-    path=path
-)
+dataloader = DatasetLoader(path=path)
 
 dataloader.load_data()
 st.write(dataloader.data)
@@ -168,7 +169,7 @@ st.write(
     As it is possible to observe all categorical features for variant B have less than 14,720
     samples while the features for variant A have more than or near 30,000 samples. This shows us
     that the data set is quite unbalanced. There are lots of ways of solving this problem, bye
-    either undersampling the data with most categories or oversampling the data with less 
+    either undersampling the data with most categories or oversampling the data with less
     caretories.
 
     Since the purpose here is to show the code, let`s go with the dummiest possible way of
@@ -180,16 +181,20 @@ st.write(
 
 dataloader.data = dataloader.data.drop(["c5", "n9"], axis=1)
 
-"""This is the dataset distribution for each column considering both variants before the undersample
-of variant A."""
+st.write(
+    """This is the dataset distribution for each column considering both variants before the
+    undersample of variant A."""
+)
 st.write(dataloader.data.groupby("variant").count())
 
 temp = stats.undersample_col_with_na_with_categorical_group(
     data=dataloader.data, col="variant", group="A"
 )
 
-"""This is the dataset distribution for each column considering both variants after the undersample
-of variant A."""
+st.write(
+    """This is the dataset distribution for each column considering both variants after the
+    undersample of variant A."""
+)
 dataloader.data = temp
 
 st.write(dataloader.data.groupby("variant").count())
@@ -203,7 +208,7 @@ st.write(
 )
 
 
-st.header("Checking Numerical Features")
+st.header("Distribution Numerical Features")
 st.write(
     """
     One of the many possible ways of verifying the distribution of numerical features is with a
@@ -211,18 +216,44 @@ st.write(
     and observe the percentiles of the distribution. Let\\`s visualize it for each individual
     feature:
     """
-
 )
 
-
-chosen = st.selectbox(
-    label="select option: ",
-    options=dataloader.numerical_feature_names,
-    placeholder="Chose the numerical feature to analyze",
-)
 with st.container(border=True):
+    chosen = st.selectbox(
+        label="select option: ",
+        options=dataloader.numerical_feature_names,
+        placeholder="Chose the numerical feature to analyze",
+    )
+    st.write(
+        f"""By observing the boxplot, it is possible to observe that the feature `{chosen}` has the
+        interquantile range of {dataloader.data[chosen].quantile(0.01),
+                                 dataloader.data[chosen].quantile(0.99)}
+        considering the quantiles of (lower, upper) bound of (0.01, 0.99).""",
+    )
+    st.markdown(
+        """Quantile ranges here compute with
+        [pandas.Series.quantile](https://pandas.pydata.org/docs/reference/api/pandas.Series.quantile.html)
+        """
+    )
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(5, 5))
     sns.boxplot(ax=ax, data=dataloader.data[chosen], orient="v", notch=False)
     st.pyplot(fig)
-    st.write(chosen * 3)
-st.write("ii")
+
+st.write(
+    """
+    Considering that everything above and bellow these threshold are outliers there are two
+    possibilities here:
+
+    * Remove these outliers entirely considering that this sample is noise and it does not bring any
+    descriptive information;
+
+    * Apply a clipping technique in these thresholds for the lower and upper bound taking into
+    consideration that the outlier is in fact right but was an exception for the cases.
+
+    There is no easy way of identifying which approach is right without iterate over the model with
+    a battery of tests.
+
+    For the sake of timing, let's assume that the second approach here is the right one and just
+    clip those samples to the thresholds for each numerical feature.
+    """
+)
