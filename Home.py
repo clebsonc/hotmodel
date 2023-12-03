@@ -2,14 +2,11 @@
 
 import os
 
-import seaborn as sns
 import streamlit as st
-from matplotlib import pyplot as plt
 
 import hotmodel.stats as stats
 from hotmodel.data_loader import DatasetLoader
-
-sns.set_theme()
+from hotmodel.hotplot import numerical_feature_container_boxplot
 
 st.title("Hotmodel Data")
 
@@ -218,26 +215,7 @@ st.write(
     """
 )
 
-with st.container(border=True):
-    chosen = st.selectbox(
-        label="select option: ",
-        options=dataloader.numerical_feature_names,
-        placeholder="Chose the numerical feature to analyze",
-    )
-    st.write(
-        f"""By observing the boxplot, it is possible to observe that the feature `{chosen}` has the
-        interquantile range of {dataloader.data[chosen].quantile(0.01),
-                                 dataloader.data[chosen].quantile(0.99)}
-        considering the quantiles of (lower, upper) bound of (0.01, 0.99).""",
-    )
-    st.markdown(
-        """Quantile ranges here compute with
-        [pandas.Series.quantile](https://pandas.pydata.org/docs/reference/api/pandas.Series.quantile.html)
-        """
-    )
-    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(5, 5))
-    sns.boxplot(ax=ax, data=dataloader.data[chosen], orient="v", notch=False)
-    st.pyplot(fig)
+numerical_feature_container_boxplot(dataloader=dataloader, key=0)
 
 st.write(
     """
@@ -257,3 +235,12 @@ st.write(
     clip those samples to the thresholds for each numerical feature.
     """
 )
+
+dataloader.data = stats.multi_col_clip(
+    data=dataloader.data,
+    cols=dataloader.numerical_feature_names,
+    quantile_lower_bound=0.05,
+    quantile_upper_bound=0.95,
+)
+
+numerical_feature_container_boxplot(dataloader=dataloader, key=1)
