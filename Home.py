@@ -22,6 +22,7 @@ st.markdown(
     6. [Distribution of numerical features](#6-distribution-of-numerical-features)
     7. [Clipping numerical features](#7-clipping-numerical-features)
     8. [User Engagement](#8-user-engagement)
+    9. [Model Recomendation](#9-model-recommendation)
     """
 )
 
@@ -393,3 +394,8 @@ st.success(
     engagement and the revenue it seems reasonable to recommend the use of **Variant B**.
     """
 )
+
+
+st.header("9. Model recommendation")
+
+st.info("Work in progress")
