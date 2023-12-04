@@ -185,7 +185,7 @@ st.write(
     """
     As it is possible to observe all categorical features for variant B have less than 14,720
     samples while the features for variant A have more than or near 30,000 samples. This shows us
-    that the data set is quite unbalanced. There are lots of ways of solving this problem, such as
+    that the data set is quite imbalanced. There are lots of ways of solving this problem, such as
     undersampling the data with most categories or oversampling the data with less
     categories.
     """
@@ -313,13 +313,81 @@ st.write(
 
 st.header("8. User Engagement")
 
+st.write(
+    """
+    The data has 4 columns that allow us to make assumptions of user behavior for two variants in a
+    *A/B* test.
+
+    - `variant`: whether the user was exposed to test *A* or test *B*.
+    - `n1`: the user engagement prior the test accumulated for a period of 30 days
+    - `n13`: the user engagment during the test accumulated for a period of 7 days
+    - `n14`: the revenue for the given variant
+
+    The cleaned data can be seem bellow after all transformations in the previous chapters:
+    """
+)
+
 st.write(dataloader.data[["variant", "n1", "n13", "n14"]])
+
+st.write(
+    """
+    The goal of this section is to understand which test variant performed better after the 7 day
+    trial. Therefore we can not use any information of the first metric `n1`. Otherwise we could
+    introduce bias of users past behavior in our analysis.
+    """
+)
+
+st.warning(
+    """
+    It is a bad practice to use user and model past performance when evaluating model current
+    performance.
+
+    Users change their behavior and models can shift its performance because of data
+    distribution shift.
+    It is woth to read this great artcle:
+    [Data shift](https://huyenchip.com/2022/02/07/data-distribution-shifts-and-monitoring.html)
+    """
+)
+
+st.write(
+    """
+    Considering this, lets infer which test is better by taking into consideration only the
+    information provided by the user engagement during the 7-day test trial and its revenue
+    for both variant *A* and *B*.
+    """
+)
+
+st.markdown(
+    """
+    The bellow image shows 4 charts:
+
+    1. The number of users exposed for each variant during the test trial (top left chart)
+    2. The revenue contrast with user engagement (top right chart)
+    3. The revenue by variant showing the 95 percentile interval (bottom left chart)
+    4. The user engagement by variant showing the 95 percentile interval (bottom right chart)
+    """
+)
 
 hotplot.engagement_vs_revenue_multiplot(
     dataloader=dataloader, group="variant", engagement="n13", revenue="n14"
 )
 
-st.info(
+st.write(
+    """
+    In the first plot we can see that the variant A was exposed to more users holding a total
+    of near 17,500 impressions while the variant B was exposed to almost 15,000 users.
+    Although the variant *A* had more users exposed, we can observe in the second chart
+    that the variant *B* was abble to obtain more revenue while keeping the users engagement
+    higher.
+
+    It seems easier to just suppose right now that the variant B is better. However we must
+    assess if the aggregated value of revenue and users engagement for each variant does not
+    have any uncertanty around the estimate. We can use an error bar in a bar plot to analyze
+    this with the default mean aggregation metric.
+    """
+)
+
+st.success(
     """
     After analyzing the performance of Variant A and Variant B by just looking at the user
     engagement and the revenue it seems reasonable to recommend the use of **Variant B**.
