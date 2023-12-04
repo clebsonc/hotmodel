@@ -1,14 +1,32 @@
-import seaborn as sns
-import streamlit as st
-from matplotlib import pyplot as plt
+"""App main page."""
 
-import hotmodel.stats as stats
-from hotmodel.data_loader import DatasetLoader
 import os
 
-sns.set_theme()
+import streamlit as st
 
-st.title("Hotmodel Data")
+import hotmodel.stats as stats
+from hotmodel import hotplot
+from hotmodel.data_loader import DatasetLoader
+
+st.title("Data Analysis")
+
+st.markdown(
+    """
+    ### Table of Contents
+
+    1. [Given Feature Description](#1-given-feature-description)
+    2. [First look at the data](#2-first-look-at-the-data)
+    3. [Parsing data types](#3-parsing-data-types)
+    4. [Features with Missing Values](#4-features-with-missing-values)
+    5. [Undersampling by missing values](#5-undersampling-by-missing-values)
+    6. [Distribution of numerical features](#6-distribution-of-numerical-features)
+    7. [Clipping numerical features](#7-clipping-numerical-features)
+    8. [User Engagement](#8-user-engagement)
+    """
+)
+
+
+st.header("1. Given Feature Description")
 
 st.markdown(
     """
@@ -28,7 +46,7 @@ st.markdown(
     """
 )
 
-st.header("First Look at the data")
+st.header("2. First Look at the data")
 st.write(
     """
     We are using `pandas.Dataframe` to analyse the dataset. The first thing that we should pay
@@ -45,9 +63,7 @@ if path is None:
     st.exception(EnvironmentError("Environment Variable `data_path` is not set."))
     st.stop()
 
-dataloader = DatasetLoader(
-    path=path
-)
+dataloader = DatasetLoader(path=path)
 
 dataloader.load_data()
 st.write(dataloader.data)
@@ -63,7 +79,7 @@ st.write(
 )
 dataloader.data.dtypes
 
-st.header("Parsing data types")
+st.header("3. Parsing data types")
 st.write(
     """
     As it is possible to observe, most categorical features were loaded as `object`. This is really
@@ -95,7 +111,7 @@ dataloader.parse_column_types(
 dataloader.data.dtypes
 
 
-st.header("Features with missing values")
+st.header("4. Features with missing values")
 st.write(
     """
     We should also pay some attention to column `c5`.
@@ -163,33 +179,49 @@ c2.write(cat_stats["c6"]["primary"])
 c2.write(cat_stats["c6"]["secondary"])
 st.write("---")
 
+
+st.header("5. Undersampling by missing values")
 st.write(
     """
     As it is possible to observe all categorical features for variant B have less than 14,720
     samples while the features for variant A have more than or near 30,000 samples. This shows us
-    that the data set is quite unbalanced. There are lots of ways of solving this problem, bye
-    either undersampling the data with most categories or oversampling the data with less 
-    caretories.
-
+    that the data set is quite unbalanced. There are lots of ways of solving this problem, such as
+    undersampling the data with most categories or oversampling the data with less
+    categories.
+    """
+)
+st.write(
+    """
     Since the purpose here is to show the code, let`s go with the dummiest possible way of
     resampling the dataset by just dropping all lines containing missing values for the categorical
     features for the variant with most samples, which is variant A.
+    """
+)
+st.info(
+    """
+    There are better ways of dealing with imbalanced classes in machine learning such as the
+    scikit-learn contribution of
+    [imbalanced-learn](https://github.com/scikit-learn-contrib/imbalanced-learn).
     """
 )
 
 
 dataloader.data = dataloader.data.drop(["c5", "n9"], axis=1)
 
-"""This is the dataset distribution for each column considering both variants before the undersample
-of variant A."""
+st.write(
+    """This is the dataset distribution for each column considering both variants before the
+    undersample of variant A."""
+)
 st.write(dataloader.data.groupby("variant").count())
 
 temp = stats.undersample_col_with_na_with_categorical_group(
     data=dataloader.data, col="variant", group="A"
 )
 
-"""This is the dataset distribution for each column considering both variants after the undersample
-of variant A."""
+st.write(
+    """This is the dataset distribution for each column considering both variants after the
+    undersample of variant A."""
+)
 dataloader.data = temp
 
 st.write(dataloader.data.groupby("variant").count())
@@ -203,7 +235,7 @@ st.write(
 )
 
 
-st.header("Checking Numerical Features")
+st.header("6. Distribution of Numerical Features")
 st.write(
     """
     One of the many possible ways of verifying the distribution of numerical features is with a
@@ -211,20 +243,85 @@ st.write(
     and observe the percentiles of the distribution. Let\\`s visualize it for each individual
     feature:
     """
-
 )
 
-chosen = st.selectbox(
-    label="select option: ",
-    options=numerical_features,
-    placeholder="Chose the numerical feature to analyze",
+hotplot.numerical_feature_container_boxplot(dataloader=dataloader, key=0)
+
+st.write(
+    """
+    Considering that everything above and bellow these threshold are outliers there are two
+    possibilities here:
+
+    * Remove these outliers entirely considering that this sample is noise and it does not bring any
+    descriptive information;
+
+    * Apply a clipping technique in for the lower and upper bound threshold assuming that
+    the outlier is in fact right but was an exception for the cases.
+    """
 )
-with st.container(border=True):
-    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(5, 5))
-    sns.boxplot(ax=ax, data=dataloader.data[chosen], orient="v", notch=False)
-    st.pyplot(fig)
 
-    st.write(chosen * 3)
+st.header("""7. Clipping numerical features""")
+st.write(
+    """
+    There is no easy way of identifying which approach is right without iterate over the model with
+    a battery of tests.
+
+    For the sake of timing, let's assume that the second approach here is the right one and just
+    clip those samples to the thresholds for each numerical feature.
+    """
+)
+
+min_bound = 0.05
+max_bound = 0.95
+dataloader.data = stats.multi_col_clip(
+    data=dataloader.data,
+    cols=dataloader.numerical_feature_names,
+    quantile_lower_bound=min_bound,
+    quantile_upper_bound=max_bound,
+)
 
 
-st.write("ii")
+st.write(
+    f"""
+    After clipping the features considering the 90 percentile with (lower, upper) bounds of
+    {min_bound, max_bound} it is possible to observe that the data is more smooth for most of the
+    features.
+    """
+)
+hotplot.numerical_feature_container_boxplot(dataloader=dataloader, key=1)
+
+st.write(
+    """
+    There are a few exceptions such as features `n7` and `n10` which do seem to have
+    some awkward values. However, when looking individually at the features, we can observe that
+    they were already clipped as expected. See bellow:
+    """
+)
+st.write(dataloader.data[["n7", "n10"]])
+
+st.write(
+    """
+    It is not ideal to presume the behavior of these samples
+    before building a model and evaluating its importance and behavior on a test.
+
+    For the sake of saving time, let's just believe that any model building on this rule will be
+    able to handle these cases and figure out improvements after having a concrete idea of how the
+    model will perform.
+    """
+)
+
+
+st.header("8. User Engagement")
+
+st.write(dataloader.data[["variant", "n1", "n13", "n14"]])
+
+hotplot.engagement_vs_revenue_multiplot(
+    dataloader=dataloader, group="variant", engagement="n13", revenue="n14"
+)
+
+st.info(
+    """
+    After analyzing the performance of Variant A and Variant B by just looking at the user
+    engagement and the revenue it seems reasonable to recommend the use of **Variant B**.
+    """
+)

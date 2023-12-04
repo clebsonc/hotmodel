@@ -50,3 +50,23 @@ def undersample_col_with_na_with_categorical_group(
     temp_b = data[data[col] != group]
     temp = data.loc[list(temp_a.index) + list(temp_b.index), :]
     return temp
+
+
+def multi_col_clip(
+    data: pd.DataFrame,
+    cols: list[str],
+    quantile_lower_bound: float = 0.01,
+    quantile_upper_bound: float = 0.99,
+):
+    data = data.copy(deep=True)
+    for c in cols:
+        min_bound = data[c].quantile(quantile_lower_bound)
+        max_bound = data[c].quantile(quantile_upper_bound)
+
+        # This is a limit that allow us to better visualize samples.
+        # The table makes any number greather than 2**53 as `inf`.
+        # if making matricial operations on this number, everything will be `inf`
+        max_bound = max_bound if max_bound < 2**53 else 2**52
+
+        data[c] = data[c].clip(min_bound, max_bound)
+    return data
