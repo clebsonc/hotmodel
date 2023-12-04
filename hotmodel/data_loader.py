@@ -2,6 +2,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from typing import Optional
+
 
 class DatasetLoader:
     def __init__(
@@ -58,7 +60,7 @@ class DatasetLoader:
             self._data[boolean_columns] = self._data[boolean_columns].astype(bool)
 
     @property
-    def numerical_feature_names(self) -> list[str]:
+    def numerical_feature_names(self) -> Optional[list[str]]:
         if self._data is not None:
             t = self._data.dtypes.reset_index().rename({0: 'type', 'index': 'feature_name'}, axis=1)
             features = t[t['type'] == 'float']
