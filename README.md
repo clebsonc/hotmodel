@@ -6,7 +6,7 @@ In other words, if you had to choose only one version of the experiment, which o
 In addition of that, create a model that will recommend a test variant for a user,
 in order to maximize their monetization, but without losing engagement.
 
-To answer that, all details are given in the `Home` app page.
+To answer that, all details are given in the [Home](https://hotmodel.streamlit.app/) app page.
 
 
 ## Local instalation instructions
@@ -17,4 +17,3 @@ documentation work in progress...
 ## Running the app locally
 
 documentation work in progress...
-
