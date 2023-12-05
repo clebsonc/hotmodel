@@ -21,11 +21,11 @@ st.markdown(
     2. [First look at the data](#2-first-look-at-the-data)
     3. [Parsing data types](#3-parsing-data-types)
     4. [Features with Missing Values](#4-features-with-missing-values)
-    5. [Undersampling by missing values](#5-undersampling-by-missing-values)
+    5. [Undersampling by Missing Values](#5-undersampling-by-missing-values)
     6. [Distribution of numerical features](#6-distribution-of-numerical-features)
     7. [Clipping numerical features](#7-clipping-numerical-features)
     8. [User Engagement](#8-user-engagement)
-    9. [Model Recomendation](#9-model-recommendation)
+    9. [Model Recommendation](#9-model-recommendation)
     """
 )
 
@@ -54,8 +54,8 @@ st.header("2. First Look at the data")
 st.write(
     """
     We are using `pandas.Dataframe` to analyse the dataset. The first thing that we should pay
-    attention to is if the supposed columns does match wath the description suggests.
-    Let\\`s load the data for the first time and glance at the raw data:
+    attention to is if the supposed columns do match what the description suggests.
+    Let's load the data for the first time and glance at the raw data:
     """
 )
 
@@ -74,7 +74,7 @@ st.write(
     The next thing we should pay attention to is if the data was properly loaded and parsed. This
     will make any matricial operation on the data work as expected.
 
-    To check this, let\\`s first ensure that the data structure is exactly what it is supposed to
+    To check this, Let's first ensure that the data structure is exactly what it is supposed to
     be:
     """
 )
@@ -88,7 +88,7 @@ st.write(
     dataset (that fits in memory) the operations will take longer processing time. We should coerce
     its type to `string`.
 
-    Lastly, let\\`s remove the column `id`, since it is just a mapping of earch row. It really
+    Lastly, Let's remove the column `id`, since it is just a mapping of earch row. It really
     doesn`t bring any real information regarding the user.
 
     Let`s verify the data type after coercion:
@@ -116,8 +116,8 @@ st.header("4. Features with missing values")
 st.write(
     """
     We should also pay some attention to column `c5`.
-    The data description informs that this columns is a categorical column, however it was loaded as
-    a `boolean` value. Let\\`s  verify some statistics regarding this feature for each test variant:
+    The data description informs that this column is a categorical column, however it was loaded as
+    a `boolean` value. Let's  verify some statistics regarding this feature for each test variant:
     """
 )
 st.write(stats.get_stats_by_variant(dataloader.data, col=["c5"]))
@@ -131,7 +131,7 @@ st.write(
 st.write(
     """
     Another interesting fact that is possible to observe here is that the column `n9`
-    is mostly None. Let\\`s verify this information.
+    is mostly None. Let's verify this information.
     """
 )
 
@@ -157,25 +157,25 @@ cat_stats = stats.get_categorical_substats_by_variant_and_column(
 )
 
 c1, c2, c3 = st.columns(3)
-c1.write("Aggregation for column C1")
+c1.write("Aggregation for column C1:")
 c1.write(cat_stats["c1"]["primary"])
 c1.write(cat_stats["c1"]["secondary"])
 
-c2.write("Aggregation for column C2")
+c2.write("Aggregation for column C2:")
 c2.write(cat_stats["c2"]["primary"])
 c2.write(cat_stats["c2"]["secondary"])
 
-c3.write("Aggregation for column C3")
+c3.write("Aggregation for column C3:")
 c3.write(cat_stats["c3"]["primary"])
 c3.write(cat_stats["c3"]["secondary"])
 
 st.write("---")
 c1, c2 = st.columns(2)
-c1.write("Aggregation for column C4")
+c1.write("Aggregation for column C4:")
 c1.write(cat_stats["c4"]["primary"])
 c1.write(cat_stats["c4"]["secondary"])
 
-c2.write("Aggregation for column C6")
+c2.write("Aggregation for column C6:")
 c2.write(cat_stats["c6"]["primary"])
 c2.write(cat_stats["c6"]["secondary"])
 st.write("---")
@@ -184,7 +184,7 @@ st.write("---")
 st.header("5. Undersampling by missing values")
 st.write(
     """
-    As it is possible to observe all categorical features for variant B have less than 14,720
+    As it is possible to observe, all categorical features for variant B have less than 14,720
     samples while the features for variant A have more than or near 30,000 samples. This shows us
     that the data set is quite imbalanced. There are lots of ways of solving this problem, such as
     undersampling the data with most categories or oversampling the data with less
@@ -202,7 +202,7 @@ st.warning(
     """
     There are better ways of dealing with imbalanced classes in machine learning such as the
     scikit-learn contribution of
-    [imbalanced-learn](https://github.com/scikit-learn-contrib/imbalanced-learn).
+    [*imbalanced-learn*](https://github.com/scikit-learn-contrib/imbalanced-learn).
     """
 )
 
@@ -221,7 +221,7 @@ temp = stats.undersample_col_with_na_with_categorical_group(
 
 st.write(
     """This is the dataset distribution for each column considering both variants after the
-    undersample of variant A."""
+    undersample of variant A:"""
 )
 dataloader.data = temp
 
@@ -229,8 +229,8 @@ st.write(dataloader.data.groupby("variant").count())
 
 st.write(
     """
-    After the undersample, the only collum that have missing values is column `c2`.
-    Let\\`s just ignore it and handle these missing values in the pipeline when building any model
+    After the undersample, the only column that has missing values is column `c2`.
+    Let's just ignore it and handle these missing values in the pipeline when building any model
     with this data.
     """
 )
@@ -240,8 +240,8 @@ st.header("6. Distribution of Numerical Features")
 st.write(
     """
     One of the many possible ways of verifying the distribution of numerical features is with a
-    box and whiskers plot. The benefit of using this plot is the ease of identifying outliers
-    and observe the percentiles of the distribution. Let\\`s visualize it for each individual
+    box-and-whiskers plot. The benefit of using this plot is the ease of identifying outliers
+    and observe the percentiles of the distribution. Let's visualize it for each individual
     feature:
     """
 )
@@ -295,7 +295,7 @@ st.write(
     """
     There are a few exceptions such as features `n7` and `n10` which do seem to have
     some awkward values. However, when looking individually at the features, we can observe that
-    they were already clipped as expected. See bellow:
+    they were already clipped as expected. See below:
     """
 )
 st.write(dataloader.data[["n7", "n10"]])
@@ -316,7 +316,7 @@ st.header("8. User Engagement")
 
 st.write(
     """
-    The data has 4 columns that allow us to make assumptions of user behavior for two variants in a
+    The data have 4 columns that allow us to make assumptions of user behavior for two variants in a
     *A/B* test.
 
     - `variant`: whether the user was exposed to test *A* or test *B*.
@@ -402,7 +402,7 @@ st.write(
     samples that are increasing the overall mean.
 
     If we consider the lower bound of the error bar, it is still possible to infer that variant *B*
-    was able to outperform the variant *A* for both revenue and user engagemet values.
+    was able to outperform the variant *A* for both revenue and user engagement values.
     """
 )
 
@@ -417,6 +417,12 @@ st.success(
 st.header("9. Model recommendation of Variants")
 st.write(
     """
+    
+    """
+)
+
+st.write(
+    """
     Get recommendations of variants by entering the payload in the form bellow.
     The form already contains an example of how the payload should looklike.
     To submit the request just press CTRL + Enter.
@@ -425,6 +431,10 @@ st.write(
 
 
 dataloader.data.loc[dataloader.data[dataloader.data["c2"].isna()].index, "c2"] = "missing"
+
+hyperparameters_path = os.environ.get("hyperparameters_path")
+with open(hyperparameters_path) as file:
+    hyperparameters = json.load(file)
 
 model = HotModelClassifier(
     data=dataloader.data,
@@ -447,7 +457,7 @@ model = HotModelClassifier(
         "n12",
         "n14",
     ],
-    hyperparameters={"n_estimators": 5, "max_depth": 10},
+    hyperparameters=hyperparameters
 )
 
 df_transformed = model.pipeline_builder(
@@ -456,8 +466,39 @@ df_transformed = model.pipeline_builder(
 
 model.train(df_transformed, target="variant")
 
+st.write(
+    f"""
+    Model trained with `RandomForestClassifier` using the out-of-bag samples
+    as a validation technique. This works just like the cross validation.
+    The model performance is computed with the [accuracy score](
+    https://scikit-learn.org/stable/modules/generated/sklearn.metrics.accuracy_score.html#sklearn.metrics.accuracy_score).
+    The model accuracy with the OOB samples is:
+    """,
+    model.model.oob_score_
+)
+
+st.write(
+    """The model parameters for the model are:"""
+)
+st.json(
+    model.model.get_params(), expanded=False
+)
+
+st.write(
+    """
+    This model is build with a Pipeline that is generic enought to add any other
+    transformer provided by SKlearn library. As a starter, the trained model here
+    is using the `OrdinalEncoder` to map categorical features and `LabelEncoder`
+    to map the classes.
+
+
+    An inference for model prediction can be sent to the model by inputting the payload
+    to the text_area below.
+    """
+)
+
 input = st.text_area(
-    label="Enter the paylod to get predictions, such as the given sample:",
+    label="Enter the payload to get predictions, such as the given sample:",
     value="""[{"c1": "VVk", "c2": "aHRtb", "c3": "c3Y", "c4": "cW1vY", "c6": "KzEwOjAw",
 "n1": 919.491878, "n2": 3439.61554, "n3": 3.628679, "n4": 0.060963,
 "n5": 1220.191514, "n6": 794768584.697085, "n7": 1373818.119745, "n8": 2871.977813,
@@ -486,3 +527,16 @@ st.write(input_df)
 
 st.write("The recommendation for this payload is:")
 st.write(result)
+
+
+st.info(
+    """
+    We could do much more, but since this is only an example, I will let other validation
+    techniques such as Cross-validation score and Hyperparameter Tunning as a `TODO` for
+    future versions.
+
+    Also, I could implemente other `Imputers` and `Transformers` such as the `one-hot-encoder`
+    and `feature-normalizer`.
+    But I will let this as a TODO as well.
+    """
+)

@@ -18,13 +18,13 @@ def numerical_feature_container_boxplot(
             key=key,
         )
         st.markdown(
-            f"""By observing the boxplot, it is possible to observe that the feature `{chosen}`
-            has the interquantile range of { dataloader.data[chosen].quantile(min_bound),
+            f"""By observing the boxplot, it is possible to see that the feature `{chosen}`
+            has the interquartile range of { dataloader.data[chosen].quantile(min_bound),
             dataloader.data[chosen].quantile(max_bound)} considering the quantiles of
             (lower, upper) bound of **{min_bound, max_bound}**.""",
         )
         st.markdown(
-            """Quantile ranges here compute with
+            """Quantile ranges here are computed with
             [pandas.Series.quantile](https://pandas.pydata.org/docs/reference/api/pandas.Series.quantile.html)
             """
         )

@@ -1,0 +1,5 @@
+{
+    "n_estimators": 5,
+    "max_depth": 10,
+    "oob_score": true
+}
