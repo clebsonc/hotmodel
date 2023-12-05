@@ -1,12 +1,15 @@
 """App main page."""
 
+import json
 import os
 
+import pandas as pd
 import streamlit as st
 
 import hotmodel.stats as stats
 from hotmodel import hotplot
 from hotmodel.data_loader import DatasetLoader
+from hotmodel.model import HotModelClassifier
 
 st.title("Data Analysis")
 
@@ -56,9 +59,6 @@ st.write(
     """
 )
 
-# dataloader = DatasetLoader(
-#     path="input/data.csv",
-# )
 path = os.environ.get("data_path")
 if path is None:
     st.exception(EnvironmentError("Environment Variable `data_path` is not set."))
@@ -198,7 +198,7 @@ st.write(
     features for the variant with most samples, which is variant A.
     """
 )
-st.info(
+st.warning(
     """
     There are better ways of dealing with imbalanced classes in machine learning such as the
     scikit-learn contribution of
@@ -373,7 +373,7 @@ hotplot.engagement_vs_revenue_multiplot(
     dataloader=dataloader, group="variant", engagement="n13", revenue="n14"
 )
 
-st.write(
+st.markdown(
     """
     In the first plot we can see that the variant A was exposed to more users holding a total
     of near 17,500 impressions while the variant B was exposed to almost 15,000 users.
@@ -385,6 +385,24 @@ st.write(
     assess if the aggregated value of revenue and users engagement for each variant does not
     have any uncertanty around the estimate. We can use an error bar in a bar plot to analyze
     this with the default mean aggregation metric.
+
+    The third and fourth charts shows exactly this using a nonparametric approach of computing
+    error bars in which is considered the percentile interval of 95%. This is a better approach than
+    the default standard deviation. To better understand the differences of error bars types
+    is recomended to read the article [Statistical Estimation and error bars](
+        https://seaborn.pydata.org/tutorial/error_bars.html#statistical-estimation-and-error-bars
+    ).
+    """
+)
+
+st.write(
+    """
+    After introducing the error bars, we can observe that the degree of uncertanty around the
+    estimate is huge for both variants *A* and *B*, which probably means that there are some few
+    samples that are increasing the overall mean.
+
+    If we consider the lower bound of the error bar, it is still possible to infer that variant *B*
+    was able to outperform the variant *A* for both revenue and user engagemet values.
     """
 )
 
@@ -396,6 +414,75 @@ st.success(
 )
 
 
-st.header("9. Model recommendation")
+st.header("9. Model recommendation of Variants")
+st.write(
+    """
+    Get recommendations of variants by entering the payload in the form bellow.
+    The form already contains an example of how the payload should looklike.
+    To submit the request just press CTRL + Enter.
+    """
+)
 
-st.info("Work in progress")
+
+dataloader.data.loc[dataloader.data[dataloader.data["c2"].isna()].index, "c2"] = "missing"
+
+model = HotModelClassifier(
+    data=dataloader.data,
+    features=[
+        "c1",
+        "c2",
+        "c3",
+        "c4",
+        "c6",
+        "n1",
+        "n2",
+        "n3",
+        "n4",
+        "n5",
+        "n6",
+        "n7",
+        "n8",
+        "n10",
+        "n11",
+        "n12",
+        "n14",
+    ],
+    hyperparameters={"n_estimators": 5, "max_depth": 10},
+)
+
+df_transformed = model.pipeline_builder(
+    ordinal_features=["c1", "c2", "c3", "c4", "c6"], one_hot_features=None
+)
+
+model.train(df_transformed, target="variant")
+
+input = st.text_area(
+    label="Enter the paylod to get predictions, such as the given sample:",
+    value="""[{"c1": "VVk", "c2": "aHRtb", "c3": "c3Y", "c4": "cW1vY", "c6": "KzEwOjAw",
+"n1": 919.491878, "n2": 3439.61554, "n3": 3.628679, "n4": 0.060963,
+"n5": 1220.191514, "n6": 794768584.697085, "n7": 1373818.119745, "n8": 2871.977813,
+"n10": 35545017295.76872, "n11": 58.621714, "n12": 0.287334, "n13": 247.261582, "n14": 3.540294,
+"n15": 456}, {"c1": "SU4", "c2": "YW5kc", "c3": "ZW4", "c4": "c2Ftc",
+"c6": "KzAyOjAw",  "n1": 2.414766, "n2": 8.643291, "n3": 1.372131, "n4": 29.678661,
+"n5": 3.950505, "n6": 1.009164, "n7": 0.015539, "n8": 14.672125, "n10": 0.00359,
+"n11": 0.008302, "n12": 0.025759, "n13": 2.502559, "n14": 0.00353, "n15": 123}]""",
+)
+
+try:
+    input_payload_data = json.loads(input)
+except Exception:
+    st.warning("Payload error. Try to fix the problem")
+    st.stop()
+
+input_df = pd.DataFrame(input_payload_data)
+try:
+    result = model.predict(payload=input_df)
+except Exception:
+    st.warning("Payload is wrong.")
+    st.stop()
+
+st.write("The input payload to get variant recommendations is:")
+st.write(input_df)
+
+st.write("The recommendation for this payload is:")
+st.write(result)
