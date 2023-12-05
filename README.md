@@ -11,9 +11,12 @@ To answer that, all details are given in the [Home](https://hotmodel.streamlit.a
 
 ## Local instalation instructions
 
-documentation work in progress...
+Works with python 3.11. Checkout the `pyproject.toml` file.
 
+Install [pipx](https://github.com/pypa/pipx)
+Install Poetry with Pipx: `pipx install poetry`
+Run install command: `poetry install` or `pip install .` in an virtual environment.
 
 ## Running the app locally
 
-documentation work in progress...
+Just run `./streamlit run Home.py` from the virtualen in which the instalation in the previous sections was made.
