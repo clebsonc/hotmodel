@@ -19,4 +19,17 @@ Run install command: `poetry install` or `pip install .` in an virtual environme
 
 ## Running the app locally
 
-Just run `./streamlit run Home.py` from the virtualen in which the instalation in the previous sections was made.
+Set the environment variables `data_path` and `hyperparameters_path`. Example
+
+```
+export data_path=input/data/data.csv 
+export hyperparameters_path=input/config/hyperparameters.json
+```
+
+After that just activate the virtual environment:
+
+```
+source .env/bin/activate
+```
+
+Finally, just run `./streamlit run Home.py`
