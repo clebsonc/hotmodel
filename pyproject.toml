@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "hotmodel"
 version = "0.1.0"
-description = "Analyzing output of Hotmart A/B test and building model to identify which model is the best."
+description = "Analyzing output of Hotmart A/B Test and building model to identify which model is the best."
 authors = ["Clebson Cardoso <clebsondm@gmail.com>"]
 readme = "README.md"
 packages = [
